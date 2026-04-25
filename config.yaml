@@ -1,0 +1,1445 @@
+# TerminalGuard Configuration File
+# Based on patterns from Gitleaks, TruffleHog, and Secrets-Patterns-DB
+
+detection:
+  enabled: true
+  case_sensitive: false
+  
+  patterns:
+    
+    # === SSH & CRYPTOGRAPHIC KEYS (14 patterns) ===
+    
+    ssh_public_key_rsa:
+      regex: "^ssh-rsa\\s+[A-Za-z0-9+/]+={0,2}"
+      description: "SSH RSA Public Key"
+      severity: "low"
+    
+    ssh_public_key_dss:
+      regex: "^ssh-dss\\s+[A-Za-z0-9+/]+={0,2}"
+      description: "SSH DSS Public Key"
+      severity: "low"
+    
+    ssh_public_key_ed25519:
+      regex: "^ssh-ed25519\\s+[A-Za-z0-9+/]+={0,2}"
+      description: "SSH Ed25519 Public Key"
+      severity: "low"
+    
+    ssh_public_key_ecdsa:
+      regex: "^ssh-ecdsa\\s+[A-Za-z0-9+/]+={0,2}"
+      description: "SSH ECDSA Public Key"
+      severity: "low"
+    
+    ssh_private_key_rsa:
+      regex: "-----BEGIN RSA PRIVATE KEY-----"
+      description: "RSA Private Key"
+      severity: "critical"
+    
+    ssh_private_key_dsa:
+      regex: "-----BEGIN DSA PRIVATE KEY-----"
+      description: "DSA Private Key"
+      severity: "critical"
+    
+    ssh_private_key_ec:
+      regex: "-----BEGIN EC PRIVATE KEY-----"
+      description: "EC Private Key"
+      severity: "critical"
+    
+    ssh_private_key_openssh:
+      regex: "-----BEGIN OPENSSH PRIVATE KEY-----"
+      description: "OpenSSH Private Key"
+      severity: "critical"
+    
+    pkcs8_private_key:
+      regex: "-----BEGIN PRIVATE KEY-----"
+      description: "PKCS8 Private Key"
+      severity: "critical"
+    
+    pgp_private_key:
+      regex: "-----BEGIN PGP PRIVATE KEY BLOCK-----"
+      description: "PGP Private Key Block"
+      severity: "critical"
+    
+    pgp_public_key:
+      regex: "-----BEGIN PGP PUBLIC KEY BLOCK-----"
+      description: "PGP Public Key Block"
+      severity: "low"
+    
+    certificate:
+      regex: "-----BEGIN CERTIFICATE-----"
+      description: "X.509 Certificate"
+      severity: "low"
+    
+    certificate_request:
+      regex: "-----BEGIN CERTIFICATE REQUEST-----"
+      description: "Certificate Signing Request"
+      severity: "low"
+    
+    tls_certificate:
+      regex: "-----BEGIN TLS CERTIFICATE-----"
+      description: "TLS Certificate"
+      severity: "low"
+    
+    # === AWS & CLOUD PROVIDERS (11 patterns) ===
+    
+    aws_access_key:
+      regex: "AKIA[0-9A-Z]{16}"
+      description: "AWS Access Key ID"
+      severity: "critical"
+    
+    aws_secret_key:
+      regex: "aws_secret_access_key[\\s]*[=:]+[\\s]*[\"']?([0-9a-zA-Z/+=]{40})[\"']?"
+      description: "AWS Secret Access Key"
+      severity: "critical"
+    
+    aws_session_token:
+      regex: "aws_session_token[\\s]*[=:]+[\\s]*[\"']?([0-9a-zA-Z/+=]+)[\"']?"
+      description: "AWS Session Token"
+      severity: "high"
+    
+    aws_account_id:
+      regex: "(?i)(AccountID|Account_ID)[\\s]*[=:]+[\\s]*[\"']?([0-9]{12})[\"']?"
+      description: "AWS Account ID"
+      severity: "low"
+    
+    aws_mws_auth_token:
+      regex: "amzn\\.mws\\.[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+      description: "AWS MWS Auth Token"
+      severity: "high"
+    
+    azure_storage_key:
+      regex: "DefaultEndpointsProtocol=https;AccountName=[^;]+;AccountKey=[^;]+;"
+      description: "Azure Storage Connection String"
+      severity: "critical"
+    
+    azure_subscription_id:
+      regex: "(?i)(subscription[_-]?id|subscription-id)[\\s]*[=:]+[\\s]*[\"']?([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})[\"']?"
+      description: "Azure Subscription ID"
+      severity: "medium"
+    
+    gcp_service_account:
+      regex: "\"type\"\\s*:\\s*\"service_account\""
+      description: "GCP Service Account JSON"
+      severity: "high"
+    
+    gcp_api_key:
+      regex: "AIza[0-9A-Za-z\\-_]{35}"
+      description: "GCP API Key"
+      severity: "high"
+    
+    gcp_oauth_client_id:
+      regex: "[0-9]+-[0-9A-Za-z_]{32}\\.apps\\.googleusercontent\\.com"
+      description: "GCP OAuth Client ID"
+      severity: "medium"
+    
+    gcp_oauth_token:
+      regex: "ya29\\.[0-9A-Za-z\\-_]+"
+      description: "GCP OAuth Access Token"
+      severity: "high"
+    
+    # === MCP-SPECIFIC AUTHENTICATION (5 patterns) ===
+    
+    mcp_api_key:
+      regex: "mcp[_-]?(api[_-]?)?key[\\s]*[=:]+[\\s]*[\"']?([0-9a-zA-Z\\-_]{32,})[\"']?"
+      description: "MCP API Key"
+      severity: "high"
+    
+    mcp_access_token:
+      regex: "(?i)(mcp[_-])?access[_-]?token[\\s]*[=:]+[\\s]*[\"']?([0-9a-zA-Z\\-_]{40,})[\"']?"
+      description: "MCP Access Token"
+      severity: "high"
+    
+    mcp_server_secret:
+      regex: "(?i)mcp[_-]?server[_-]?secret[\\s]*[=:]+[\\s]*[\"']?([0-9a-zA-Z\\-_]{32,})[\"']?"
+      description: "MCP Server Secret"
+      severity: "critical"
+    
+    mcp_client_secret:
+      regex: "(?i)mcp[_-]?client[_-]?secret[\\s]*[=:]+[\\s]*[\"']?([0-9a-zA-Z\\-_]{32,})[\"']?"
+      description: "MCP Client Secret"
+      severity: "critical"
+    
+    mcp_bearer_token:
+      regex: "(?i)mcp[_-]?bearer[\\s]*[=:]+[\\s]*Bearer\\s+[a-zA-Z0-9\\-_.]+"
+      description: "MCP Bearer Token"
+      severity: "high"
+    
+    # === DATABASE CREDENTIALS (14 patterns) ===
+    
+    mongodb_uri:
+      regex: "mongodb\\+srv://[^:]+:[^@]+@[^/]+/.+"
+      description: "MongoDB Atlas Connection URI"
+      severity: "critical"
+    
+    mongodb_local:
+      regex: "mongodb://[^:]+:[^@]+@[^/]+/.+"
+      description: "MongoDB Connection URI"
+      severity: "critical"
+    
+    postgres_uri:
+      regex: "postgres(ql)?://([^:]+):([^@]+)@([^/]+)/(.+)"
+      description: "PostgreSQL Connection String"
+      severity: "critical"
+    
+    mysql_uri:
+      regex: "mysql://([^:]+):([^@]+)@([^/]+)/(.+)"
+      description: "MySQL Connection String"
+      severity: "critical"
+    
+    mariadb_uri:
+      regex: "mariadb://([^:]+):([^@]+)@([^/]+)/(.+)"
+      description: "MariaDB Connection String"
+      severity: "critical"
+    
+    mssql_uri:
+      regex: "mssql://[^:]+:[^@]+@[^/]+"
+      description: "MSSQL Connection String"
+      severity: "critical"
+    
+    mssql_odbc:
+      regex: "Driver={ODBC Driver.*};Server=[^;]+;Database=[^;]+;Uid=[^;]+;Pwd=[^;]+"
+      description: "MSSQL ODBC Connection"
+      severity: "critical"
+    
+    oracle_connection:
+      regex: "(?i)(Data Source|Host)=[^;]+;.*User Id=[^;]+;Password=[^;]+"
+      description: "Oracle Connection String"
+      severity: "critical"
+    
+    sqlite_path:
+      regex: "sqlite://([^\\s]+\\.db)"
+      description: "SQLite Database Path"
+      severity: "medium"
+    
+    cassandra_host:
+      regex: "(?i)(cassandra[_-]?host|cassandra[_-]?server)[\\s]*[=:]+"
+      description: "Cassandra Host Configuration"
+      severity: "medium"
+    
+    redis_uri:
+      regex: "redis://[^:]+:[^@]+@[^/]+"
+      description: "Redis Connection URI"
+      severity: "high"
+    
+    elasticsearch_uri:
+      regex: "elasticsearch://[^:]+:[^@]+@[^:]+:[0-9]+"
+      description: "Elasticsearch Connection URI"
+      severity: "high"
+    
+    couchdb_uri:
+      regex: "couchdb://[^:]+:[^@]+@[^/]+"
+      description: "CouchDB Connection URI"
+      severity: "high"
+    
+    dynamodb_endpoint:
+      regex: "(?i)dynamodb://[^:]+:[^@]+@[^/]+"
+      description: "DynamoDB Endpoint Configuration"
+      severity: "high"
+    
+    # === PAYMENT & FINANCIAL SERVICES (11 patterns) ===
+    
+    stripe_api_key_secret:
+      regex: "sk_live_[0-9a-zA-Z]{20,}"
+      description: "Stripe Secret API Key"
+      severity: "critical"
+    
+    stripe_api_key_public:
+      regex: "pk_live_[0-9a-zA-Z]{20,}"
+      description: "Stripe Public API Key"
+      severity: "medium"
+    
+    stripe_api_key_restricted:
+      regex: "rk_live_[0-9a-zA-Z]{20,}"
+      description: "Stripe Restricted API Key"
+      severity: "high"
+    
+    stripe_webhook_endpoint:
+      regex: "whsec_[0-9a-zA-Z]{20,}"
+      description: "Stripe Webhook Endpoint Secret"
+      severity: "high"
+    
+    paypal_client_id:
+      regex: "[0-9a-zA-Z_]{20,}"
+      description: "PayPal Client ID"
+      severity: "medium"
+    
+    paypal_signature:
+      regex: "(?i)paypal[_-]?signature[\\s]*[=:]+[\\s]*[\"']?([0-9a-zA-Z]+)[\"']?"
+      description: "PayPal Signature"
+      severity: "high"
+    
+    square_api_key:
+      regex: "sq0atp-[0-9a-zA-Z_-]{20,}"
+      description: "Square API Key"
+      severity: "high"
+    
+    square_app_id:
+      regex: "sq0rp-[0-9a-zA-Z_-]{20,}"
+      description: "Square App ID"
+      severity: "medium"
+    
+    twilio_account_sid:
+      regex: "AC[0-9a-zA-Z]{32}"
+      description: "Twilio Account SID"
+      severity: "medium"
+    
+    twilio_auth_token:
+      regex: "(?i)twilio[_-]?auth[_-]?token[\\s]*[=:]+[\\s]*[\"']?([0-9a-zA-Z]{32})[\"']?"
+      description: "Twilio Auth Token"
+      severity: "high"
+    
+    twilio_api_key:
+      regex: "SK[0-9a-zA-Z]{34}"
+      description: "Twilio API Key"
+      severity: "high"
+    
+    # === AI/ML SERVICE CREDENTIALS (13 patterns) ===
+    
+    openai_api_key:
+      regex: "sk-[a-zA-Z0-9]{20}T3BlbkFJ[a-zA-Z0-9]{20}"
+      description: "OpenAI API Key (Old Format)"
+      severity: "critical"
+    
+    openai_api_key_new:
+      regex: "sk-[a-zA-Z0-9\\-_]{48}"
+      description: "OpenAI API Key (New Format)"
+      severity: "critical"
+    
+    openai_org_key:
+      regex: "sk-org-[a-zA-Z0-9\\-_]{24}"
+      description: "OpenAI Organization Key"
+      severity: "high"
+    
+    anthropic_api_key:
+      regex: "sk-ant-api03-[a-zA-Z0-9\\-_]{95,}"
+      description: "Anthropic Claude API Key"
+      severity: "critical"
+    
+    cohere_api_key:
+      regex: "[a-zA-Z0-9]{40}"
+      description: "Cohere API Key"
+      severity: "high"
+    
+    huggingface_token:
+      regex: "hf_[a-zA-Z0-9]{32,}"
+      description: "Hugging Face Access Token"
+      severity: "high"
+    
+    mistral_api_key:
+      regex: "(?i)mistral[_-]?api[_-]?key[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9]{32})[\"']?"
+      description: "Mistral AI API Key"
+      severity: "high"
+    
+    groq_api_key:
+      regex: "gsk_[a-zA-Z0-9]{32,}"
+      description: "Groq API Key"
+      severity: "high"
+    
+    together_api_key:
+      regex: "(?i)together[_-]?api[_-]?key[\\s]*[=:]+[\\s]*[\"']?([0-9a-zA-Z\\-_]{40,})[\"']?"
+      description: "Together AI API Key"
+      severity: "high"
+    
+    perplexity_api_key:
+      regex: "pplx-[a-zA-Z0-9]{32,}"
+      description: "Perplexity API Key"
+      severity: "high"
+    
+    deepseek_api_key:
+      regex: "sk-[a-zA-Z0-9]{48}"
+      description: "DeepSeek API Key"
+      severity: "high"
+    
+    bedrock_api_key:
+      regex: "(?i)bedrock[_-]?(api[_-]?)?key[\\s]*[=:]+[\\s]*[\"']?([0-9a-zA-Z\\-_]{32,})[\"']?"
+      description: "AWS Bedrock API Key"
+      severity: "high"
+    
+    sagemaker_token:
+      regex: "(?i)sagemaker[_-]?token[\\s]*[=:]+[\\s]*[\"']?([0-9a-zA-Z\\-_]{40,})[\"']?"
+      description: "AWS SageMaker Token"
+      severity: "high"
+    
+    # === MESSAGING & QUEUE SYSTEMS (10 patterns) ===
+    
+    rabbitmq_uri:
+      regex: "amqp://[^:]+:[^@]+@[^/]+"
+      description: "RabbitMQ Connection URI"
+      severity: "high"
+    
+    rabbitmq_amqps:
+      regex: "amqps://[^:]+:[^@]+@[^/]+"
+      description: "RabbitMQ Secure Connection URI"
+      severity: "high"
+    
+    kafka_bootstrap:
+      regex: "(?i)(bootstrap[_-]?servers|kafka[_-]?brokers)[\\s]*[=:]+"
+      description: "Kafka Bootstrap Servers"
+      severity: "medium"
+    
+    kafka_api_key:
+      regex: "(?i)kafka[_-]?api[_-]?key[\\s]*[=:]+[\\s]*[\"']?([0-9a-zA-Z\\-_]{32,})[\"']?"
+      description: "Kafka API Key"
+      severity: "high"
+    
+    kafka_api_secret:
+      regex: "(?i)kafka[_-]?api[_-]?secret[\\s]*[=:]+[\\s]*[\"']?([0-9a-zA-Z\\-_]{40,})[\"']?"
+      description: "Kafka API Secret"
+      severity: "high"
+    
+    mqtt_broker:
+      regex: "(?i)mqtt://[^:]+:[^@]+@[^:]+:[0-9]+"
+      description: "MQTT Broker Connection"
+      severity: "high"
+    
+    nats_server:
+      regex: "(?i)nats://[^@]+@[^:]+:[0-9]+"
+      description: "NATS Server Connection"
+      severity: "high"
+    
+    activemq_uri:
+      regex: "(?i)activemq://[^:]+:[^@]+@[^/]+"
+      description: "ActiveMQ Connection URI"
+      severity: "high"
+    
+    rabbitmq_user:
+      regex: "(?i)rabbitmq[_-]?user[\\s]*[=:]+[\\s]*[\"']?([^\"'\\s]+)[\"']?"
+      description: "RabbitMQ Username"
+      severity: "medium"
+    
+    rabbitmq_password:
+      regex: "(?i)rabbitmq[_-]?password[\\s]*[=:]+[\\s]*[\"']?([^\"'\\s]+)[\"']?"
+      description: "RabbitMQ Password"
+      severity: "high"
+    
+    # === MONITORING & LOGGING (9 patterns) ===
+    
+    splunk_hec_token:
+      regex: "(?i)splunk[_-]?hec[_-]?token[\\s]*[=:]+[\\s]*[\"']?([0-9a-f-]{36})[\"']?"
+      description: "Splunk HEC Token"
+      severity: "high"
+    
+    datadog_api_key:
+      regex: "(?i)datadog[_-]?api[_-]?key[\\s]*[=:]+[\\s]*[\"']?([0-9a-f]{32})[\"']?"
+      description: "Datadog API Key"
+      severity: "high"
+    
+    newrelic_license_key:
+      regex: "(?i)newrelic[_-]?license[_-]?key[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9]{40})[\"']?"
+      description: "New Relic License Key"
+      severity: "high"
+    
+    grafana_api_token:
+      regex: "glc_[a-zA-Z0-9]{32,}"
+      description: "Grafana API Token"
+      severity: "high"
+    
+    elastic_cloud_id:
+      regex: "(?i)elastic[_-]?cloud[_-]?id[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9:]+)[\"']?"
+      description: "Elasticsearch Cloud ID"
+      severity: "high"
+    
+    elastic_api_key:
+      regex: "(?i)elastic[_-]?api[_-]?key[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9]{20,})[\"']?"
+      description: "Elasticsearch API Key"
+      severity: "high"
+    
+    sumo_logic_access_id:
+      regex: "(?i)sumo[_-]?logic[_-]?access[_-]?id[\\s]*[=:]+"
+      description: "Sumo Logic Access ID"
+      severity: "high"
+    
+    dynatrace_token:
+      regex: "(?i)dynatrace[_-]?token[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9]{20,})[\"']?"
+      description: "Dynatrace Token"
+      severity: "high"
+    
+    sentry_dsn:
+      regex: "https://[a-zA-Z0-9]+@[a-zA-Z0-9.]+/[0-9]+"
+      description: "Sentry DSN"
+      severity: "high"
+    
+    # === OAUTH & JWT TOKENS (9 patterns) ===
+    
+    github_token:
+      regex: "ghp_[0-9a-zA-Z]{36}"
+      description: "GitHub Personal Access Token"
+      severity: "critical"
+    
+    github_oauth_token:
+      regex: "gho_[0-9a-zA-Z]{36}"
+      description: "GitHub OAuth Token"
+      severity: "high"
+    
+    github_app_token:
+      regex: "ghu_[0-9a-zA-Z]{36}"
+      description: "GitHub App Installation Token"
+      severity: "high"
+    
+    gitlab_token:
+      regex: "glpat-[0-9a-zA-Z_-]{20,}"
+      description: "GitLab Personal Access Token"
+      severity: "critical"
+    
+    gitlab_runner_token:
+      regex: "glrt_[a-zA-Z0-9_-]{20,}"
+      description: "GitLab Runner Token"
+      severity: "high"
+    
+    bitbucket_token:
+      regex: "(?i)bitbucket[_-]?token[\\s]*[=:]+[\\s]*[\"']?([0-9a-zA-Z]{32,})[\"']?"
+      description: "Bitbucket Token"
+      severity: "high"
+    
+    jwt_token:
+      regex: "eyJ[a-zA-Z0-9_-]+\\.[a-zA-Z0-9_-]+\\.[a-zA-Z0-9_-]+"
+      description: "JWT Token"
+      severity: "high"
+    
+    oauth_access_token:
+      regex: "(?i)oauth[_-]?access[_-]?token[\\s]*[=:]+[\\s]*[\"']?([0-9a-zA-Z\\-_.]{20,})[\"']?"
+      description: "OAuth Access Token"
+      severity: "high"
+    
+    oauth_refresh_token:
+      regex: "(?i)refresh[_-]?token[\\s]*[=:]+[\\s]*[\"']?([0-9a-zA-Z\\-_.]{20,})[\"']?"
+      description: "OAuth Refresh Token"
+      severity: "high"
+    
+    # === CONTAINER & ORCHESTRATION (6 patterns) ===
+    
+    docker_config_auth:
+      regex: '"auth"\\s*:\\s*"[A-Za-z0-9+/=]{20,}"'
+      description: "Docker Config Auth"
+      severity: "high"
+    
+    docker_registry_url:
+      regex: "docker://[^@]+@[^/]+"
+      description: "Docker Registry URL with Credentials"
+      severity: "high"
+    
+    kubernetes_secret:
+      regex: "(?i)kubernetes\\s+secret[\\s]*[=:]+[\\s]*[\"']?([A-Za-z0-9\\-_.]{32,})[\"']?"
+      description: "Kubernetes Secret"
+      severity: "high"
+    
+    kubernetes_ca_cert:
+      regex: "-----BEGIN CERTIFICATE-----"
+      description: "Kubernetes CA Certificate"
+      severity: "low"
+    
+    kubectl_config:
+      regex: "(?i)cluster:[\\s]*server:[\\s]*https://[^\\s]+"
+      description: "Kubectl Config Cluster"
+      severity: "medium"
+    
+    helm_secret:
+      regex: "(?i)helm[_-]?secret[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9\\-_]{32,})[\"']?"
+      description: "Helm Secret"
+      severity: "high"
+    
+    # === CLOUD STORAGE (6 patterns) ===
+    
+    s3_uri:
+      regex: "s3://[a-zA-Z0-9._-]+/.*"
+      description: "AWS S3 URI"
+      severity: "medium"
+    
+    s3_access_key:
+      regex: "ASIA[0-9A-Z]{16}"
+      description: "AWS S3 Temporary Access Key"
+      severity: "high"
+    
+    gcs_uri:
+      regex: "gs://[a-zA-Z0-9._-]+/.*"
+      description: "Google Cloud Storage URI"
+      severity: "medium"
+    
+    gcs_json_key:
+      regex: '"private_key"\\s*:\\s*"-----BEGIN PRIVATE KEY-----'
+      description: "GCS Service Account Key"
+      severity: "critical"
+    
+    azure_blob_uri:
+      regex: "https://[a-zA-Z0-9]+\\.blob\\.core\\.windows\\.net"
+      description: "Azure Blob Storage URI"
+      severity: "medium"
+    
+    aws_arn:
+      regex: "arn:aws:[a-zA-Z0-9-]*:[a-zA-Z0-9-]*:[0-9]{12}:[a-zA-Z0-9-/:*]*"
+      description: "AWS ARN"
+      severity: "low"
+    
+    # === PII & SENSITIVE DATA (11 patterns) ===
+    
+    credit_card_visa:
+      regex: "4[0-9]{12}(?:[0-9]{3})?(?:-?[0-9]{4})*"
+      description: "Visa Credit Card"
+      severity: "critical"
+    
+    credit_card_mastercard:
+      regex: "5[1-5][0-9]{14}"
+      description: "Mastercard Credit Card"
+      severity: "critical"
+    
+    credit_card_amex:
+      regex: "3[47][0-9]{13}"
+      description: "American Express Card"
+      severity: "critical"
+    
+    credit_card_discover:
+      regex: "6(?:011|5[0-9]{2})[0-9]{12}"
+      description: "Discover Card"
+      severity: "critical"
+    
+    credit_card_diners:
+      regex: "3(?:0[0-5]|[68][0-9])[0-9]{11}"
+      description: "Diners Club Card"
+      severity: "critical"
+    
+    ssn_us:
+      regex: "\\b[0-9]{3}-[0-9]{2}-[0-9]{4}\\b"
+      description: "US Social Security Number"
+      severity: "critical"
+    
+    phone_us:
+      regex: "\\b(?:\\+?1[-.]?)?\\(?[0-9]{3}\\)?[-.]?[0-9]{3}[-.]?[0-9]{4}\\b"
+      description: "US Phone Number"
+      severity: "medium"
+    
+    phone_intl:
+      regex: "\\+(?:[0-9]{1,3}[-. ]?)?[0-9]{1,14}"
+      description: "International Phone Number"
+      severity: "medium"
+    
+    email:
+      regex: "(?i)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}"
+      description: "Email Address"
+      severity: "low"
+    
+    ipv4_address:
+      regex: "\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b"
+      description: "IPv4 Address"
+      severity: "low"
+    
+    ipv6_address:
+      regex: "(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}"
+      description: "IPv6 Address"
+      severity: "low"
+    
+    # === AUTHENTICATION HEADERS (4 patterns) ===
+    
+    authorization_header:
+      regex: "Authorization:\\s*(Bearer|Basic|Digest|AWS|ApiKey|X-Api-Key)\\s+[^\\s\\n]+"
+      description: "Authorization Header"
+      severity: "high"
+    
+    x_api_key_header:
+      regex: "X-API-Key\\s*:\\s*[a-zA-Z0-9\\-_]{20,}"
+      description: "X-API-Key Header"
+      severity: "high"
+    
+    api_key_header:
+      regex: "(?i)(api[_-]?key|apikey)\\s*:\\s*[a-zA-Z0-9\\-_]{20,}"
+      description: "API Key Header"
+      severity: "high"
+    
+    x_auth_token:
+      regex: "X-Auth-Token\\s*:\\s*[a-zA-Z0-9\\-_]{20,}"
+      description: "X-Auth-Token Header"
+      severity: "high"
+    
+    # === CONFIGURATION FILES (6 patterns) ===
+    
+    xml_credentials:
+      regex: "<(password|secret|token|api[_-]?key)>([^<]+)</\\1>"
+      description: "XML Credentials"
+      severity: "high"
+    
+    json_secret:
+      regex: '"(password|secret|token|api[_-]?key|api[_-]?secret)"\\s*:\\s*"([^"]+)"'
+      description: "JSON Secret Value"
+      severity: "high"
+    
+    env_file_secret:
+      regex: "(?i)^(password|secret|token|api[_-]?key)=(.+)$"
+      description: ".env File Secret"
+      severity: "high"
+    
+    yaml_secret:
+      regex: "(?i)(password|secret|token|api[_-]?key)\\s*:\\s*[\"']?([^\\n\"']+)[\"']?"
+      description: "YAML Secret Value"
+      severity: "high"
+    
+    ini_secret:
+      regex: "(?i)(password|secret|token|api[_-]?key)\\s*=\\s*[\"']?([^\\n\"']+)[\"']?"
+      description: "INI File Secret"
+      severity: "high"
+    
+    properties_secret:
+      regex: "(?i)(password|secret|token|api[_-]?key)\\s*=\\s*[\"']?([^\\n\"']+)[\"']?"
+      description: "Properties File Secret"
+      severity: "high"
+    
+    # === PROTOCOL-SPECIFIC CREDENTIALS (5 patterns) ===
+    
+    http_basic_auth:
+      regex: "http://[a-zA-Z0-9._-]+:[a-zA-Z0-9._-]+@"
+      description: "HTTP Basic Auth in URL"
+      severity: "high"
+    
+    https_basic_auth:
+      regex: "https://[a-zA-Z0-9._-]+:[a-zA-Z0-9._-]+@"
+      description: "HTTPS Basic Auth in URL"
+      severity: "high"
+    
+    ftp_credentials:
+      regex: "ftp://[a-zA-Z0-9._-]+:[a-zA-Z0-9._-]+@"
+      description: "FTP Credentials in URL"
+      severity: "high"
+    
+    sftp_credentials:
+      regex: "sftp://[a-zA-Z0-9._-]+:[a-zA-Z0-9._-]+@"
+      description: "SFTP Credentials in URL"
+      severity: "high"
+    
+    ldap_bind_password:
+      regex: "(?i)(ldap|active[_-]?directory)[^}]*bindPassword[\\s]*=\\s*[\"']?([^\"'\\s}]+)[\"']?"
+      description: "LDAP Bind Password"
+      severity: "high"
+    
+    # === INJECTION & SECURITY BYPASS (4 patterns) ===
+    
+    sql_injection_basic:
+      regex: "(?i)('|(\\-\\-)|(;)|(\\|\\|)|(&&)|(\\*))\\s*(union|select|drop|insert|update|delete|create|alter)"
+      description: "SQL Injection Keywords"
+      severity: "high"
+    
+    command_injection:
+      regex: "[;&|`$()]+(cat|ls|rm|curl|wget|nc|bash|sh|powershell|cmd)\\s"
+      description: "Command Injection Operators"
+      severity: "high"
+    
+    xss_payload:
+      regex: "(?i)(<script|javascript:|onerror=|onload=|onclick=)"
+      description: "XSS Payload Indicators"
+      severity: "high"
+    
+    path_traversal:
+      regex: "\\.\\.[\\\\/]|\\.\\.%2[fF]"
+      description: "Path Traversal Pattern"
+      severity: "high"
+    
+    # === GITHUB & VERSION CONTROL (6 patterns) ===
+    
+    github_pat:
+      regex: "ghp_[0-9a-zA-Z]{36}"
+      description: "GitHub Personal Access Token"
+      severity: "critical"
+    
+    github_oauth:
+      regex: "gho_[0-9a-zA-Z]{36}"
+      description: "GitHub OAuth Token"
+      severity: "high"
+    
+    github_refresh_token:
+      regex: "ghr_[0-9a-zA-Z]{36}"
+      description: "GitHub Refresh Token"
+      severity: "high"
+
+    
+    gitlab_pat:
+      regex: "glpat-[0-9a-zA-Z_-]{20,}"
+      description: "GitLab Personal Access Token"
+      severity: "critical"
+    
+    bitbucket_server_token:
+      regex: "(?i)bitbucket[_-]?server[_-]?token[\\s]*[=:]+"
+      description: "Bitbucket Server Token"
+      severity: "high"
+    
+    # === SECURITY & COMPLIANCE (5 patterns) ===
+    
+    slack_token:
+      regex: "(xox[p|b|o|a]-[0-9]{12}-[0-9]{12}-[0-9]{12}-[a-z0-9]{32})"
+      description: "Slack Token"
+      severity: "critical"
+    
+    slack_webhook:
+      regex: "https://hooks\\.slack\\.com/services/T[0-9A-Z]+/B[0-9A-Z]+/[0-9a-zA-Z]+"
+      description: "Slack Webhook URL"
+      severity: "high"
+    
+    slack_bot_token:
+      regex: "xoxb-[0-9]{10,13}-[0-9]{10,13}-[a-zA-Z0-9]{24,34}"
+      description: "Slack Bot Token"
+      severity: "critical"
+    
+    discord_token:
+      regex: "(?i)discord.*token[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9_-]{59,})[\"']?"
+      description: "Discord Bot Token"
+      severity: "critical"
+    
+    telegram_bot_token:
+      regex: "(?i)telegram.*token[\\s]*[=:]+[\\s]*[\"']?([0-9]+:[a-zA-Z0-9_-]{35,})[\"']?"
+      description: "Telegram Bot Token"
+      severity: "critical"
+    
+    # === INFRASTRUCTURE & DEVOPS (4 patterns) ===
+    
+    jenkins_api_token:
+      regex: "(?i)jenkins[_-]?api[_-]?token[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9]{32})[\"']?"
+      description: "Jenkins API Token"
+      severity: "high"
+    
+    hashicorp_vault_token:
+      regex: "(?i)vault[_-]?token[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9\\.]{20,})[\"']?"
+      description: "HashiCorp Vault Token"
+      severity: "critical"
+    
+    terraform_cloud_token:
+      regex: "(?i)terraform[_-]?cloud[_-]?token[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9]{20,})[\"']?"
+      description: "Terraform Cloud Token"
+      severity: "high"
+    
+    ansible_vault:
+      regex: "\\$ANSIBLE_VAULT;[0-9]\\.[0-9];aes256"
+      description: "Ansible Vault Header"
+      severity: "high"
+    
+    # === ADDITIONAL API KEYS & SaaS (19 patterns) ===
+    
+    sendgrid_api_key:
+      regex: "SG\\.[\\w\\d\\-_]{22}\\.[\\w\\d\\-_]{43}"
+      description: "SendGrid API Key"
+      severity: "critical"
+    
+    mailgun_api_key:
+      regex: "key-[0-9a-zA-Z]{32}"
+      description: "Mailgun API Key"
+      severity: "high"
+    
+    mailchimp_api_key:
+      regex: "[0-9a-f]{32}-us[0-9]{1,2}"
+      description: "MailChimp API Key"
+      severity: "high"
+    
+    firebase_api_key:
+      regex: "AAAA[A-Za-z0-9_-]{7}:[A-Za-z0-9_-]{140}"
+      description: "Firebase Secret"
+      severity: "critical"
+    
+    algolia_api_key:
+      regex: "[0-9a-f]{32}"
+      description: "Algolia API Key"
+      severity: "high"
+    
+    segment_write_key:
+      regex: "(?i)segment[_-]?write[_-]?key[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9]{32})[\"']?"
+      description: "Segment Write Key"
+      severity: "high"
+    
+    amplitude_api_key:
+      regex: "(?i)amplitude[_-]?api[_-]?key[\\s]*[=:]+[\\s]*[\"']?([a-z0-9\\-]{32,64})[\"']?"
+      description: "Amplitude API Key"
+      severity: "high"
+    
+    intercom_api_token:
+      regex: "(?i)intercom[_-]?(api[_-]?)?token[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9\\-_]{20,})[\"']?"
+      description: "Intercom API Token"
+      severity: "high"
+    
+    mixpanel_api_token:
+      regex: "(?i)mixpanel[_-]?token[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9]{32})[\"']?"
+      description: "Mixpanel API Token"
+      severity: "high"
+    
+    plaid_client_id:
+      regex: "(?i)plaid[_-]?client[_-]?id[\\s]*[=:]+[\\s]*[\"']?([a-z0-9]{24})[\"']?"
+      description: "Plaid Client ID"
+      severity: "high"
+    
+    plaid_secret:
+      regex: "(?i)plaid[_-]?(client[_-]?)?secret[\\s]*[=:]+[\\s]*[\"']?([a-z0-9\\-_]{30,})[\"']?"
+      description: "Plaid Secret"
+      severity: "critical"
+    
+    netlify_access_token:
+      regex: "(?i)netlify[_-]?access[_-]?token[\\s]*[=:]+[\\s]*[\"']?([a-z0-9]{40,})[\"']?"
+      description: "Netlify Access Token"
+      severity: "high"
+    
+    cloudflare_api_key:
+      regex: "(?i)cloudflare[_-]?api[_-]?key[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9\\-_]{37})[\"']?"
+      description: "Cloudflare API Key"
+      severity: "high"
+    
+    cloudflare_api_token:
+      regex: "(?i)cloudflare[_-]?api[_-]?token[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9\\-_]{40})[\"']?"
+      description: "Cloudflare API Token"
+      severity: "high"
+    
+    heroku_api_key:
+      regex: "(?i)heroku[_-]?api[_-]?key[\\s]*[=:]+[\\s]*[\"']?([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})[\"']?"
+      description: "Heroku API Key"
+      severity: "high"
+    
+    vercel_token:
+      regex: "(?i)vercel[_-]?token[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9]{24})[\"']?"
+      description: "Vercel Token"
+      severity: "high"
+    
+    digitalocean_token:
+      regex: "(?i)digitalocean[_-]?(access[_-]?)?token[\\s]*[=:]+[\\s]*[\"']?([a-f0-9]{64})[\"']?"
+      description: "DigitalOcean Access Token"
+      severity: "critical"
+    
+    linode_api_token:
+      regex: "(?i)linode[_-]?token[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9]{64})[\"']?"
+      description: "Linode API Token"
+      severity: "high"
+    
+    vultr_api_key:
+      regex: "(?i)vultr[_-]?api[_-]?key[\\s]*[=:]+[\\s]*[\"']?([A-Z0-9]{36})[\"']?"
+      description: "Vultr API Key"
+      severity: "high"
+    
+    # === COMMUNICATION & COLLABORATION TOOLS (9 patterns) ===
+    
+    zoom_jwt_token:
+      regex: "(?i)zoom[_-]?jwt[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9\\-_]+\\.[a-zA-Z0-9\\-_]+\\.[a-zA-Z0-9\\-_]+)[\"']?"
+      description: "Zoom JWT Token"
+      severity: "high"
+    
+    zoom_api_key:
+      regex: "(?i)zoom[_-]?api[_-]?key[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9_-]{22})[\"']?"
+      description: "Zoom API Key"
+      severity: "high"
+    
+    trello_api_key:
+      regex: "(?i)trello[_-]?api[_-]?key[\\s]*[=:]+[\\s]*[\"']?([a-f0-9]{32})[\"']?"
+      description: "Trello API Key"
+      severity: "high"
+    
+    trello_token:
+      regex: "(?i)trello[_-]?token[\\s]*[=:]+[\\s]*[\"']?([a-f0-9]{64})[\"']?"
+      description: "Trello Token"
+      severity: "high"
+    
+    asana_personal_access_token:
+      regex: "(?i)asana[_-]?(pat|personal[_-]?access[_-]?token)[\\s]*[=:]+[\\s]*[\"']?([0-9]/[0-9]{16}/[a-f0-9]{32})[\"']?"
+      description: "Asana Personal Access Token"
+      severity: "high"
+    
+    notion_api_key:
+      regex: "(?i)notion[_-]?api[_-]?key[\\s]*[=:]+[\\s]*[\"']?(secret_[a-zA-Z0-9]{43})[\"']?"
+      description: "Notion API Key"
+      severity: "high"
+    
+    jira_api_token:
+      regex: "(?i)jira[_-]?api[_-]?token[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9]{24})[\"']?"
+      description: "Jira API Token"
+      severity: "high"
+    
+    confluence_api_token:
+      regex: "(?i)confluence[_-]?token[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9]{24})[\"']?"
+      description: "Confluence API Token"
+      severity: "high"
+    
+    zendesk_api_token:
+      regex: "(?i)zendesk[_-]?token[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9]{40})[\"']?"
+      description: "Zendesk API Token"
+      severity: "high"
+    
+    # === CRYPTOCURRENCY & BLOCKCHAIN (7 patterns) ===
+    
+    bitcoin_private_key:
+      regex: "(5[HJK][1-9A-Za-z]{49})"
+      description: "Bitcoin Private Key (WIF)"
+      severity: "critical"
+    
+    ethereum_private_key:
+      regex: "(?i)eth[_-]?private[_-]?key[\\s]*[=:]+[\\s]*[\"']?(0x[a-fA-F0-9]{64})[\"']?"
+      description: "Ethereum Private Key"
+      severity: "critical"
+    
+    ethereum_address:
+      regex: "0x[a-fA-F0-9]{40}"
+      description: "Ethereum Wallet Address"
+      severity: "medium"
+    
+    bitcoin_address:
+      regex: "(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,62}"
+      description: "Bitcoin Wallet Address"
+      severity: "medium"
+    
+    coinbase_api_key:
+      regex: "(?i)coinbase[_-]?api[_-]?key[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9]{32})[\"']?"
+      description: "Coinbase API Key"
+      severity: "critical"
+    
+    binance_api_key:
+      regex: "(?i)binance[_-]?api[_-]?key[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9]{64})[\"']?"
+      description: "Binance API Key"
+      severity: "critical"
+    
+    crypto_seed_phrase:
+      regex: "(?i)(seed|mnemonic)[\\s]*[=:]+[\\s]*[\"']?([a-z]+\\s+){11,23}[a-z]+[\"']?"
+      description: "Cryptocurrency Seed Phrase"
+      severity: "critical"
+    
+    # === CI/CD & BUILD SYSTEMS (7 patterns) ===
+    
+    circleci_token:
+      regex: "(?i)circle[_-]?ci[_-]?token[\\s]*[=:]+[\\s]*[\"']?([a-f0-9]{40})[\"']?"
+      description: "CircleCI Token"
+      severity: "high"
+    
+    travis_ci_token:
+      regex: "(?i)travis[_-]?token[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9]{22})[\"']?"
+      description: "Travis CI Token"
+      severity: "high"
+    
+    buildkite_token:
+      regex: "(?i)buildkite[_-]?token[\\s]*[=:]+[\\s]*[\"']?([a-f0-9]{40})[\"']?"
+      description: "Buildkite Token"
+      severity: "high"
+    
+    drone_token:
+      regex: "(?i)drone[_-]?(ci[_-]?)?token[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9]{32})[\"']?"
+      description: "Drone CI Token"
+      severity: "high"
+    
+    artifactory_api_key:
+      regex: "(?i)artifactory[_-]?api[_-]?key[\\s]*[=:]+[\\s]*[\"']?([A-Z0-9]{73})[\"']?"
+      description: "Artifactory API Key"
+      severity: "high"
+    
+    nexus_password:
+      regex: "(?i)nexus[_-]?password[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9\\-_]{8,})[\"']?"
+      description: "Nexus Repository Password"
+      severity: "high"
+    
+    sonarqube_token:
+      regex: "(?i)sonar[_-]?(qube[_-]?)?token[\\s]*[=:]+[\\s]*[\"']?([a-f0-9]{40})[\"']?"
+      description: "SonarQube Token"
+      severity: "high"
+    
+    # === GENERIC PASSWORD PATTERNS (8 patterns) ===
+    
+    password_in_url:
+      regex: "(https?|ftp)://[^:]+:([^@]+)@"
+      description: "Password in URL"
+      severity: "critical"
+    
+    password_assignment:
+      regex: "(?i)password[\\s]*[=:]+[\\s]*[\"']?([^\"'\\s]{8,})[\"']?"
+      description: "Password Assignment"
+      severity: "high"
+    
+    admin_password:
+      regex: "(?i)admin[_-]?password[\\s]*[=:]+[\\s]*[\"']?([^\"'\\s]{8,})[\"']?"
+      description: "Admin Password"
+      severity: "critical"
+    
+    root_password:
+      regex: "(?i)root[_-]?password[\\s]*[=:]+[\\s]*[\"']?([^\"'\\s]{8,})[\"']?"
+      description: "Root Password"
+      severity: "critical"
+    
+    db_password:
+      regex: "(?i)(db|database)[_-]?password[\\s]*[=:]+[\\s]*[\"']?([^\"'\\s]{8,})[\"']?"
+      description: "Database Password"
+      severity: "critical"
+    
+    user_password:
+      regex: "(?i)user[_-]?password[\\s]*[=:]+[\\s]*[\"']?([^\"'\\s]{8,})[\"']?"
+      description: "User Password"
+      severity: "high"
+    
+    default_password:
+      regex: "(?i)default[_-]?password[\\s]*[=:]+[\\s]*[\"']?([^\"'\\s]{8,})[\"']?"
+      description: "Default Password"
+      severity: "high"
+    
+    master_password:
+      regex: "(?i)master[_-]?password[\\s]*[=:]+[\\s]*[\"']?([^\"'\\s]{8,})[\"']?"
+      description: "Master Password"
+      severity: "critical"
+    
+    short_password:
+      regex: "(?i)password[\\s]*[=:]+[\\s]*[\"']?([^\"'\\s]{4,7})[\"']?"
+      description: "Short Password (4-7 chars) - Weak Security"
+      severity: "critical"
+
+    short_admin_password:
+      regex: "(?i)admin[_-]?password[\\s]*[=:]+[\\s]*[\"']?([^\"'\\s]{4,7})[\"']?"
+      description: "Short Admin Password (4-7 chars)"
+      severity: "critical"
+
+    short_root_password:
+      regex: "(?i)root[_-]?password[\\s]*[=:]+[\\s]*[\"']?([^\"'\\s]{4,7})[\"']?"
+      description: "Short Root Password (4-7 chars)"
+      severity: "critical"
+    
+    passphrase:
+      regex: "(?i)(passphrase|pass[_-]?phrase)[\\s]*[=:]+[\\s]*[\"']?([^\"'\\s]{8,})[\"']?"
+      description: "Passphrase Assignment"
+      severity: "high"
+
+    passwd:
+      regex: "(?i)\\bpasswd\\b[\\s]*[=:]+[\\s]*[\"']?([^\"'\\s]{6,})[\"']?"
+      description: "Password (passwd keyword)"
+      severity: "high"
+
+    pwd:
+      regex: "(?i)\\bpwd\\b[\\s]*[=:]+[\\s]*[\"']?([^\"'\\s]{6,})[\"']?"
+      description: "Password (pwd keyword)"
+      severity: "high"
+
+    pass_keyword:
+      regex: "(?i)\\bpass\\b[\\s]*[=:]+[\\s]*[\"']?([^\"'\\s]{8,})[\"']?"
+      description: "Password (pass keyword)"
+      severity: "high"
+
+    access_code:
+      regex: "(?i)(access[_-]?code|access[_-]?password)[\\s]*[=:]+[\\s]*[\"']?([^\"'\\s]{6,})[\"']?"
+      description: "Access Code"
+      severity: "high"
+
+    pin_code:
+      regex: "(?i)(pin|pin[_-]?code|pin[_-]?number)[\\s]*[=:]+[\\s]*[\"']?([0-9]{4,8})[\"']?"
+      description: "PIN Code"
+      severity: "high"
+
+    auth_credentials:
+      regex: "(?i)(auth|credentials|login)[\\s]*[=:]+[\\s]*[\"']?([^\"'\\s]{8,})[\"']?"
+      description: "Authentication Credentials"
+      severity: "high"
+
+    secret_value:
+      regex: "(?i)\\bsecret\\b[\\s]*[=:]+[\\s]*[\"']?([^\"'\\s]{8,})[\"']?"
+      description: "Secret Value"
+      severity: "high"
+    
+    # === NATURAL LANGUAGE PASSWORDS (HIGH) ===
+
+    password_is_pattern:
+      regex: "(?i)(password|pwd|pass)\\s+(is|was|will be|equals)\\s+[\"']?([a-zA-Z0-9!@#$%^&*]{6,})[\"']?"
+      description: "Password Mentioned as 'password is X'"
+      severity: "high"
+
+    password_use_pattern:
+      regex: "(?i)(use|enter|type|set)\\s+(password|pwd|pass)\\s*[:]?\\s*[\"']?([a-zA-Z0-9!@#$%^&*]{6,})[\"']?"
+      description: "Password in Instructions (use password X)"
+      severity: "high"
+
+    password_changed_pattern:
+      regex: "(?i)(password|pwd)\\s+(changed|reset|set)\\s+to\\s+[\"']?([a-zA-Z0-9!@#$%^&*]{6,})[\"']?"
+      description: "Password Change Notification"
+      severity: "high"
+
+    password_for_pattern:
+      regex: "(?i)(password|pwd)\\s+for\\s+\\w+\\s+is\\s+[\"']?([a-zA-Z0-9!@#$%^&*]{6,})[\"']?"
+      description: "Password Described as 'password for X is Y'"
+      severity: "high"
+      
+    # === ENCRYPTION & SECURITY KEYS (8 patterns) ===
+    
+    aes_key:
+      regex: "(?i)aes[_-]?key[\\s]*[=:]+[\\s]*[\"']?([a-f0-9]{32,64})[\"']?"
+      description: "AES Encryption Key"
+      severity: "critical"
+    
+    encryption_key:
+      regex: "(?i)encryption[_-]?key[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9+/=]{32,})[\"']?"
+      description: "Generic Encryption Key"
+      severity: "critical"
+    
+    hmac_secret:
+      regex: "(?i)hmac[_-]?secret[\\s]*[=:]+[\\s]*[\"']?([a-f0-9]{32,})[\"']?"
+      description: "HMAC Secret"
+      severity: "critical"
+    
+    signing_key:
+      regex: "(?i)signing[_-]?key[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9+/=]{32,})[\"']?"
+      description: "Signing Key"
+      severity: "critical"
+    
+    jwt_secret:
+      regex: "(?i)jwt[_-]?secret[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9\\-_]{32,})[\"']?"
+      description: "JWT Secret"
+      severity: "critical"
+    
+    session_secret:
+      regex: "(?i)session[_-]?secret[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9]{32,})[\"']?"
+      description: "Session Secret"
+      severity: "critical"
+    
+    cookie_secret:
+      regex: "(?i)cookie[_-]?secret[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9]{32,})[\"']?"
+      description: "Cookie Secret"
+      severity: "high"
+    
+    app_secret:
+      regex: "(?i)app[_-]?secret[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9]{32,})[\"']?"
+      description: "Application Secret"
+      severity: "critical"
+    
+    # === MOBILE & APP DEVELOPMENT (6 patterns) ===
+    
+    ios_push_cert:
+      regex: "-----BEGIN CERTIFICATE-----[\\s\\S]+?-----END CERTIFICATE-----"
+      description: "iOS Push Certificate"
+      severity: "high"
+    
+    android_keystore_password:
+      regex: "(?i)(keystore|storePassword)[\\s]*[=:]+[\\s]*[\"']?([^\"'\\s]{6,})[\"']?"
+      description: "Android Keystore Password"
+      severity: "critical"
+    
+    expo_token:
+      regex: "(?i)expo[_-]?token[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9\\-_]{40,})[\"']?"
+      description: "Expo Access Token"
+      severity: "high"
+    
+    ionic_token:
+      regex: "(?i)ionic[_-]?token[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9]{20,})[\"']?"
+      description: "Ionic App Flow Token"
+      severity: "high"
+    
+    firebase_cloud_messaging:
+      regex: "(?i)fcm[_-]?server[_-]?key[\\s]*[=:]+[\\s]*[\"']?(AAAA[a-zA-Z0-9\\-_:]{140,})[\"']?"
+      description: "Firebase Cloud Messaging Key"
+      severity: "high"
+    
+    onesignal_api_key:
+      regex: "(?i)onesignal[_-]?api[_-]?key[\\s]*[=:]+[\\s]*[\"']?([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})[\"']?"
+      description: "OneSignal API Key"
+      severity: "high"
+    
+    # === ANALYTICS & TRACKING (7 patterns) ===
+    
+    google_analytics:
+      regex: "UA-[0-9]{4,9}-[0-9]{1,4}"
+      description: "Google Analytics ID"
+      severity: "low"
+    
+    google_tag_manager:
+      regex: "GTM-[A-Z0-9]{7}"
+      description: "Google Tag Manager ID"
+      severity: "low"
+    
+    facebook_app_secret:
+      regex: "(?i)facebook[_-]?app[_-]?secret[\\s]*[=:]+[\\s]*[\"']?([a-f0-9]{32})[\"']?"
+      description: "Facebook App Secret"
+      severity: "critical"
+    
+    facebook_access_token:
+      regex: "EAA[a-zA-Z0-9]{100,}"
+      description: "Facebook Access Token"
+      severity: "critical"
+    
+    twitter_api_secret:
+      regex: "(?i)twitter[_-]?api[_-]?secret[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9]{45})[\"']?"
+      description: "Twitter API Secret"
+      severity: "critical"
+    
+    twitter_access_token:
+      regex: "(?i)twitter[_-]?access[_-]?token[\\s]*[=:]+[\\s]*[\"']?([0-9]{10,}-[a-zA-Z0-9]{40})[\"']?"
+      description: "Twitter Access Token"
+      severity: "high"
+    
+    linkedin_client_secret:
+      regex: "(?i)linkedin[_-]?client[_-]?secret[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9]{16})[\"']?"
+      description: "LinkedIn Client Secret"
+      severity: "high"
+    
+    # === ADDITIONAL CLOUD PROVIDERS (4 patterns) ===
+    
+    alibaba_access_key:
+      regex: "(?i)alibaba[_-]?access[_-]?key[\\s]*[=:]+[\\s]*[\"']?(LTAI[a-zA-Z0-9]{12,20})[\"']?"
+      description: "Alibaba Cloud Access Key"
+      severity: "critical"
+    
+    ibm_cloud_api_key:
+      regex: "(?i)ibm[_-]?cloud[_-]?api[_-]?key[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9_-]{44})[\"']?"
+      description: "IBM Cloud API Key"
+      severity: "critical"
+    
+    oracle_cloud_key:
+      regex: "(?i)oracle[_-]?cloud[_-]?key[\\s]*[=:]+[\\s]*[\"']?([a-f0-9]{40})[\"']?"
+      description: "Oracle Cloud API Key"
+      severity: "high"
+    
+    tencent_cloud_secret:
+      regex: "(?i)tencent[_-]?secret[_-]?key[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9]{32})[\"']?"
+      description: "Tencent Cloud Secret Key"
+      severity: "critical"
+    
+    # === ADDITIONAL DATABASE PATTERNS (5 patterns) ===
+    
+    neo4j_password:
+      regex: "(?i)neo4j[_-]?password[\\s]*[=:]+[\\s]*[\"']?([^\"'\\s]{8,})[\"']?"
+      description: "Neo4j Database Password"
+      severity: "critical"
+    
+    influxdb_token:
+      regex: "(?i)influxdb[_-]?token[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9_-]{88})[\"']?"
+      description: "InfluxDB Token"
+      severity: "high"
+    
+    timescaledb_password:
+      regex: "(?i)timescale[_-]?password[\\s]*[=:]+[\\s]*[\"']?([^\"'\\s]{8,})[\"']?"
+      description: "TimescaleDB Password"
+      severity: "critical"
+    
+    cockroachdb_uri:
+      regex: "cockroachdb://[^:]+:[^@]+@[^/]+"
+      description: "CockroachDB Connection URI"
+      severity: "critical"
+    
+    arangodb_password:
+      regex: "(?i)arango[_-]?password[\\s]*[=:]+[\\s]*[\"']?([^\"'\\s]{8,})[\"']?"
+      description: "ArangoDB Password"
+      severity: "critical"
+    
+    # === VPN & NETWORK SECURITY (4 patterns) ===
+    
+    wireguard_private_key:
+      regex: "(?i)wireguard[_-]?private[_-]?key[\\s]*[=:]+[\\s]*[\"']?([A-Za-z0-9+/]{43}=)[\"']?"
+      description: "WireGuard Private Key"
+      severity: "critical"
+    
+    openvpn_key:
+      regex: "-----BEGIN OpenVPN Static key V1-----"
+      description: "OpenVPN Static Key"
+      severity: "critical"
+    
+    ipsec_psk:
+      regex: "(?i)ipsec[_-]?psk[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9]{32,})[\"']?"
+      description: "IPSec Pre-Shared Key"
+      severity: "critical"
+    
+    cisco_type7_password:
+      regex: "(?i)password\\s+7\\s+([0-9A-F]+)"
+      description: "Cisco Type 7 Password"
+      severity: "high"
+    
+    # === ADDITIONAL SECURITY TOOLS (4 patterns) ===
+    
+    snyk_token:
+      regex: "(?i)snyk[_-]?token[\\s]*[=:]+[\\s]*[\"']?([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})[\"']?"
+      description: "Snyk API Token"
+      severity: "high"
+    
+    qualys_api_key:
+      regex: "(?i)qualys[_-]?api[_-]?key[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9]{40})[\"']?"
+      description: "Qualys API Key"
+      severity: "high"
+    
+    tenable_access_key:
+      regex: "(?i)tenable[_-]?access[_-]?key[\\s]*[=:]+[\\s]*[\"']?([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})[\"']?"
+      description: "Tenable Access Key"
+      severity: "high"
+    
+    rapid7_api_key:
+      regex: "(?i)rapid7[_-]?api[_-]?key[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9]{40})[\"']?"
+      description: "Rapid7 API Key"
+      severity: "high"
+    
+    # === E-COMMERCE & PAYMENT (6 patterns) ===
+    
+    shopify_api_key:
+      regex: "shpat_[a-fA-F0-9]{32}"
+      description: "Shopify API Token"
+      severity: "critical"
+    
+    shopify_shared_secret:
+      regex: "shpss_[a-fA-F0-9]{32}"
+      description: "Shopify Shared Secret"
+      severity: "critical"
+    
+    woocommerce_consumer_key:
+      regex: "ck_[a-zA-Z0-9]{40}"
+      description: "WooCommerce Consumer Key"
+      severity: "high"
+    
+    woocommerce_consumer_secret:
+      regex: "cs_[a-zA-Z0-9]{40}"
+      description: "WooCommerce Consumer Secret"
+      severity: "critical"
+    
+    braintree_token:
+      regex: "(?i)braintree[_-]?token[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9]{32})[\"']?"
+      description: "Braintree Token"
+      severity: "critical"
+    
+    adyen_api_key:
+      regex: "(?i)adyen[_-]?api[_-]?key[\\s]*[=:]+[\\s]*[\"']?(AQ[A-Za-z0-9]{30,})[\"']?"
+      description: "Adyen API Key"
+      severity: "critical"
+    
+    # === ADDITIONAL AI/ML PLATFORMS (4 patterns) ===
+    
+    replicate_api_token:
+      regex: "(?i)replicate[_-]?api[_-]?token[\\s]*[=:]+[\\s]*[\"']?(r8_[a-zA-Z0-9]{40})[\"']?"
+      description: "Replicate API Token"
+      severity: "high"
+    
+    stability_api_key:
+      regex: "(?i)stability[_-]?api[_-]?key[\\s]*[=:]+[\\s]*[\"']?(sk-[a-zA-Z0-9]{48})[\"']?"
+      description: "Stability AI API Key"
+      severity: "high"
+    
+    runpod_api_key:
+      regex: "(?i)runpod[_-]?api[_-]?key[\\s]*[=:]+[\\s]*[\"']?([A-Z0-9]{8}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{12})[\"']?"
+      description: "RunPod API Key"
+      severity: "high"
+    
+    colab_token:
+      regex: "(?i)colab[_-]?token[\\s]*[=:]+[\\s]*[\"']?([a-zA-Z0-9\\-_.]{100,})[\"']?"
+      description: "Google Colab Token"
+      severity: "high"
+
+
+# Whitelist Configuration
+whitelist:
+  commands:
+    - "git log"
+    - "git status"
+    - "docker ps"
+    - "ls -la"
+    - "echo"
+    - 'cat config.yaml'
+    - 'type config.yaml'
+    - 'export API_KEY=devkey_*'
+    - 'export API_KEY=TEST*'
+    - 'echo API_KEY=devkey_*'
+    - 'echo API_KEY=TEST*'
+    - 'echo password=examplepassword'
+    - 'echo ENV_SECRET=dummysecretvalue'
+
+  patterns:
+    - "example\\.com"
+    - "localhost"
+    - "127\\.0\\.0\\.1"
+    - "test[_-]?password"
+    - "dummy[_-]?key"
+    - "placeholder"
+    - "dummy"
+    - "XXXXXXXX"
+    - "\\*\\*\\*\\*\\*"
+    - '^git config'
+    - '^history'
+    - 'API_KEY=devkey_*'
+    - 'API_KEY=TEST*'
+    - 'API_KEY=your_api_key_here'
+    - 'password=examplepassword'
+    - 'ENV_SECRET=dummysecretvalue'
+
+
+# Audit logging settings
+audit:
+  enabled: true
+  log_file: 'audit.log'
+  max_size_mb: 10

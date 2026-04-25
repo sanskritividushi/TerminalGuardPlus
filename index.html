@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>TerminalGuard Dashboard</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <div class="header">
+    <h1>TerminalGuard Dashboard</h1>
+    <button id="refreshButton" title="Refresh Dashboard">Refresh</button>
+    </div>
+    <section id="stats-section" class="stats-container">
+
+        <div class="stats-details">
+
+            <div class="metric-box">
+                <div class="metric-label">Total Commands</div>
+                <div class="metric-value"><span id="totalCommands"></span></div>
+            </div>
+
+            <div class="metric-box">
+                <div class="metric-label">Blocked Commands</div>
+                <div class="metric-value"><span id="blockedCommands"></span></div>
+            </div>
+
+            <div class="metric-box">
+                <div class="metric-label">Allowed Commands</div>
+                <div class="metric-value"><span id="allowedCommands"></span></div>
+            </div>
+
+            <div class="metric-box">
+                <div class="metric-label">Total Secrets Detected</div>
+                <div class="metric-value"><span id="totalSecrets"></span></div>
+            </div>
+
+            <div class="metric-box">
+                <div class="metric-label">Block Rate</div>
+                <div class="metric-value"><span id="blockRate"></span>%</div>
+            </div>
+
+            <div class="metric-box">
+                <div class="metric-label">False Positive Rate</div>
+                <div class="metric-value"><span id="falsePositiveRate"></span>%</div>
+            </div>
+
+            <div class="metric-box">
+                <div class="metric-label">False Negative Rate</div>
+                <div class="metric-value"><span id="falseNegativeRate"></span>%</div>
+            </div>
+
+            <div class="metric-box">
+                <div class="metric-label">Accuracy</div>
+                <div class="metric-value"><span id="accuracyPercent"></span>%</div>
+            </div>
+
+        </div>
+
+        <canvas id="blockChart" width="250" height="250"></canvas>
+
+    </section>
+
+    <h2 class="performance-heading">Detection Performance</h2>
+
+    <div id="charts-area">
+        <div class="chart-card">
+            <h3>False Positives</h3>
+            <canvas id="falsePositiveChart" width="250" height="250"></canvas>
+        </div>
+
+        <div class="chart-card">
+            <h3>False Negatives</h3>
+            <canvas id="falseNegativeChart" width="250" height="250"></canvas>
+        </div>
+
+        <div class="chart-card">
+            <h3>Accuracy</h3>
+            <canvas id="accuracyChart" width="250" height="250"></canvas>
+        </div>
+
+        <div class="chart-card">
+            <h3>Severity Breakdown</h3>
+            <canvas id="severityChart" width="250" height="250"></canvas>
+        </div>
+    </div>
+
+    <h2 class="performance-heading">System Performance</h2>
+
+    <section class="stats-container">
+        <div class="stats-details">
+            <div class="metric-box">
+                <div class="metric-label">Avg Latency</div>
+                <div class="metric-value"><span id="avgLatency">-</span> ms</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-label">Min Latency</div>
+                <div class="metric-value"><span id="minLatency">-</span> ms</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-label">Max Latency</div>
+                <div class="metric-value"><span id="maxLatency">-</span> ms</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-label">P95 Latency</div>
+                <div class="metric-value"><span id="p95Latency">-</span> ms</div>
+            </div>
+        </div>
+    </section>
+
+    <h2 class="performance-heading">Detection Trends</h2>
+
+    <div id="trends-area">
+        <div class="chart-card" style="width: 100%; max-width: 600px;">
+            <h3>Detections by Hour</h3>
+            <canvas id="hourlyChart" width="500" height="200"></canvas>
+        </div>
+    </div>
+    <h2 class="log-heading">Command Log</h2>
+    <div class="pagination-controls">
+        <span id="paginationInfoTop">Logs 1-15 of 0</span>
+        <div class="pagination-buttons">
+            <button id="prevPageTop" onclick="prevPage()">&lt; Prev</button>
+            <button id="nextPageTop" onclick="nextPage()">Next &gt;</button>
+        </div>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Command</th>
+                <th>Action</th>
+                <th>Secret Found</th>
+                <th>Mark Detection</th>
+            </tr>
+        </thead>
+        <tbody id="logTableBody"></tbody>
+    </table>
+
+   
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>

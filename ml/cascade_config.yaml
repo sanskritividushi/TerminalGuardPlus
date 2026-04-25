@@ -1,0 +1,87 @@
+# Cascade Ensemble Configuration for TerminalGuard++
+# Settings for 4-level cascade detector
+
+cascade:
+  # Enable/disable each detection level
+  use_bilstm: true           # L1: BiLSTM (primary detector)
+  use_svm: true              # L2: SVM (gray zone specialist)
+  use_entropy: true          # L2.5: Entropy + context analysis
+  use_regex: true            # L3: Regex patterns (zero-FN safety)
+
+  # BiLSTM L1 Confidence Bounds (early exit thresholds)
+  # If prob > high OR prob < low → make decision and exit cascade
+  # Gray zone (low < prob < high) → continue to L2
+  bilstm_bounds: [0.15, 0.85]
+
+  # SVM L2 Confidence Bounds (same logic as L1)
+  svm_bounds: [0.20, 0.80]
+
+  # Entropy Analysis L2.5 Settings
+  entropy_threshold: 4.7          # bits/character (Shannon entropy)
+  entropy_context_boost: 1.1      # Multiply entropy score if secret context found
+
+  # Model Paths (relative to ml/ folder)
+  models:
+    bilstm: ml/tf_bilstm_model.keras
+    svm: ml/svm_model.pkl
+    svm_vectorizer: ml/svm_vectorizer.pkl
+    logistic: ml/ml_model.pkl
+    vectorizer: ml/vectorizer.pkl
+# Regex Patterns for L3 (Zero False-Negatives)
+regex_patterns:
+  # AWS
+  aws_key: 'AKIA[0-9A-Z]{16}'
+  aws_secret: 'aws_secret_access_key\s*[=:]\s*\S+'
+
+  # GitHub
+  github_token: 'ghp_[a-zA-Z0-9_]{36,255}'
+
+  # GitLab
+  gitlab_token: 'glpat-[a-zA-Z0-9_-]{20,}'
+
+  # Stripe
+  stripe_key: 'sk_live_[a-zA-Z0-9]{24,}'
+
+  # OpenAI
+  openai_api_key: 'sk-proj-[a-zA-Z0-9_-]{40,}'
+
+  # Generic Assignments
+  generic_secret: '(password|passwd|secret|token|credential|api_key|api_secret)\s*[=:]\s*\S+'
+
+  # Database URIs
+  db_uri: '(postgres|mysql|redis|mongodb)://.*:\S+@'
+
+  # Private Keys
+  private_key: '-----BEGIN.*PRIVATE KEY-----'
+
+# Benchmark & Testing Settings
+benchmark:
+  # Output file for cascade mode benchmark results
+  output_file: benchmark_eval_cascade.json
+  
+  # Number of test samples to use
+  num_samples: 500
+  
+  # Save cascade-specific metrics
+  save_cascade_metrics: true
+
+# Logging & Verbosity
+logging:
+  level: INFO                    # DEBUG, INFO, WARNING, ERROR
+  save_results: true
+  results_dir: test_results/
+  detailed_per_sample: false     # Log each detection result (verbose)
+
+# Performance Targets
+performance:
+  # Target latency for cascade detection
+  target_latency_ms: 30
+  
+  # Acceptable latency p95
+  p95_latency_ms: 50
+
+# Evaluation Metrics Targets
+targets:
+  min_recall: 0.95              # Goal: >= 95% recall (catch 95% of secrets)
+  min_precision: 0.85           # Goal: >= 85% precision (minimize false positives)
+  min_f1: 0.90                  # Goal: >= 90% F1 score
