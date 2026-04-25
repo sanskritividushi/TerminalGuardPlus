@@ -1,7 +1,8 @@
 from fastapi import FastAPI, Query, Body
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from audit_logger import AuditLogger
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from collections import defaultdict
 from datetime import datetime
 import sys, os, pymongo, certifi, psutil
@@ -14,7 +15,23 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+
 )
+
+# Serve the dashboard frontend
+STATIC_DIR = os.path.dirname(os.path.abspath(__file__))
+
+@app.get("/dashboard")
+def serve_dashboard():
+    return FileResponse(os.path.join(STATIC_DIR, "index.html"))
+
+@app.get("/dashboard.js")
+def serve_dashboard_js():
+    return FileResponse(os.path.join(STATIC_DIR, "dashboard.js"), media_type="application/javascript")
+
+@app.get("/style.css")
+def serve_dashboard_css():
+    return FileResponse(os.path.join(STATIC_DIR, "style.css"), media_type="text/css")
 
 logger = AuditLogger(use_mongodb=True)
 
@@ -85,18 +102,20 @@ def get_statistics():
         mark = log.get("mark_detection")
         secret_found = log.get("secrets_found", 0) > 0
         if mark == "true":
+            # User confirms detection was correct
             if secret_found:
-                TP += 1
+                TP += 1   # System found secret, correctly
             else:
-                FN += 1
+                TN += 1   # System found nothing, correctly
         elif mark == "false":
+            # User says detection was wrong
             if secret_found:
-                FP += 1
+                FP += 1   # System flagged secret, but it wasn't one
             else:
-                TN += 1
+                FN += 1   # System missed a secret
 
-    fp_rate = FP / (FP + TP) if (FP + TP) > 0 else 0.0
-    fn_rate = FN / (FN + TN) if (FN + TN) > 0 else 0.0
+    fp_rate = FP / (FP + TN) if (FP + TN) > 0 else 0.0
+    fn_rate = FN / (FN + TP) if (FN + TP) > 0 else 0.0
     accuracy = (TP + TN) / (TP + TN + FP + FN) if (TP + TN + FP + FN) > 0 else 0.0
     secret_types = {}
     for log in logs:

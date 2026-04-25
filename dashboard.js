@@ -1,4 +1,4 @@
-const API_BASE = 'https://terminalguardrtsd.onrender.com';
+const API_BASE = window.location.origin;
 
 let blockChart = null;
 let falsePositiveChart = null;
@@ -171,12 +171,14 @@ function calculateAndRenderMetrics() {
     let TP = 0, TN = 0, FP = 0, FN = 0;
     allLogs.forEach(log => {
         if (log.mark_detection === "true" || log.mark_detection === "false") {
-            const markedTrue = log.mark_detection === "true";
+            const markedCorrect = log.mark_detection === "true";
             const secretFound = log.secrets_found > 0;
-            if (secretFound) {
-                markedTrue ? TP++ : FP++;
+            if (markedCorrect) {
+                // User confirms detection was correct
+                secretFound ? TP++ : TN++;
             } else {
-                markedTrue ? FN++ : TN++;
+                // User says detection was wrong
+                secretFound ? FP++ : FN++;
             }
         }
     });
@@ -231,10 +233,10 @@ async function fetchPerformance() {
         const res = await fetch(`${API_BASE}/performance`);
         if (!res.ok) throw new Error("Failed to fetch performance");
         const data = await res.json();
-        document.getElementById("avgLatency").textContent = data.avg_latency_ms || "-";
-        document.getElementById("minLatency").textContent = data.min_latency_ms || "-";
-        document.getElementById("maxLatency").textContent = data.max_latency_ms || "-";
-        document.getElementById("p95Latency").textContent = data.p95_latency_ms || "-";
+        document.getElementById("avgLatency").textContent = data.avg_latency_ms ?? "-";
+        document.getElementById("minLatency").textContent = data.min_latency_ms ?? "-";
+        document.getElementById("maxLatency").textContent = data.max_latency_ms ?? "-";
+        document.getElementById("p95Latency").textContent = data.p95_latency_ms ?? "-";
     } catch (error) {
         console.error("Performance fetch error:", error);
     }
