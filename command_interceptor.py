@@ -3,6 +3,7 @@ from secret_detector import SecretDetector
 from audit_logger import AuditLogger
 from config_manager import ConfigManager
 from terminal_handler import TerminalHandler
+from ml.cascade_entropy_detector import CascadeEnsembleDetector
 
 def get_user_confirmation():
     """Ask user if they want to proceed despite warning"""
@@ -27,6 +28,7 @@ def main():
     try:
         config_manager = ConfigManager()
         detector = SecretDetector(config_manager)
+        cascade = CascadeEnsembleDetector()
         logger = AuditLogger()
         terminal = TerminalHandler()
     except Exception as e:
@@ -61,20 +63,32 @@ def main():
         if not user_input.strip():
             continue
         
-        # Intercept and check for secrets
+        # Intercept and check for secrets using cascade detector
         print(f"[INTERCEPTED] {user_input}")
-        secrets = detector.detect(user_input)
         
-        if secrets:
+        cascade_result = cascade.detect(user_input)
+        regex_secrets = detector.detect(user_input)
+        
+        blocked = cascade_result["decision"]
+        cascade_level = cascade_result["cascade_level"]
+        confidence = cascade_result["confidence"]
+        reason = cascade_result["reasoning"]
+        
+        if blocked or regex_secrets:
             # Secret detected - show warning
             print("\n" + "!" * 60)
             print("⚠️  WARNING: SENSITIVE INFORMATION DETECTED!")
             print("!" * 60)
-            for secret in secrets:
-                print(f"   Type: {secret['type']}")
-                print(f"   Description: {secret['description']}")
-                print(f"   Severity: {secret['severity'].upper()}")
-                print(f"   Found: {secret['match']}")
+            print(f"   Cascade Level: L{cascade_level}")
+            print(f"   Confidence: {confidence:.3f}")
+            print(f"   Reason: {reason}")
+            if regex_secrets:
+                print(f"\n   Regex hits:")
+                for secret in regex_secrets:
+                    print(f"     Type: {secret['type']}")
+                    print(f"     Description: {secret['description']}")
+                    print(f"     Severity: {secret['severity'].upper()}")
+                    print(f"     Found: {secret['match'][:60]}")
             print("!" * 60)
             
             # Ask user for confirmation
@@ -82,14 +96,23 @@ def main():
             
             if proceed:
                 print("\n[ALLOWED] Running command with warning logged...")
-                logger.log_event(user_input, secrets, 'ALLOWED', 'yes')
+                logger.log_event(user_input, regex_secrets, 'ALLOWED', 'yes',
+                                 extra={"cascade_level": cascade_level,
+                                        "cascade_confidence": confidence,
+                                        "cascade_reason": reason})
                 terminal.run_command(user_input)
             else:
                 print("\n[BLOCKED] Command execution cancelled for security.")
-                logger.log_event(user_input, secrets, 'BLOCKED', 'no')
+                logger.log_event(user_input, regex_secrets, 'BLOCKED', 'no',
+                                 extra={"cascade_level": cascade_level,
+                                        "cascade_confidence": confidence,
+                                        "cascade_reason": reason})
         else:
             # No secrets - run normally
-            logger.log_event(user_input, [], 'ALLOWED', None)
+            logger.log_event(user_input, [], 'ALLOWED', None,
+                             extra={"cascade_level": cascade_level,
+                                    "cascade_confidence": confidence,
+                                    "cascade_reason": reason})
             terminal.run_command(user_input)
 
 if __name__ == '__main__':

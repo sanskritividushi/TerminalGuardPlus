@@ -1420,7 +1420,7 @@ whitelist:
     - 'echo ENV_SECRET=dummysecretvalue'
 
   patterns:
-    - "example\\.com"
+    - "^(curl|wget|ping|nslookup|dig)\\s+.*example\\.com"
     - "localhost"
     - "127\\.0\\.0\\.1"
     - "test[_-]?password"
