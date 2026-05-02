@@ -1422,7 +1422,6 @@ whitelist:
   patterns:
     - "^(curl|wget|ping|nslookup|dig)\\s+.*example\\.com"
     - "localhost"
-    - "127\\.0\\.0\\.1"
     - "test[_-]?password"
     - "dummy[_-]?key"
     - "placeholder"
@@ -1436,6 +1435,18 @@ whitelist:
     - 'API_KEY=your_api_key_here'
     - 'password=examplepassword'
     - 'ENV_SECRET=dummysecretvalue'
+    - "your[_-]?(api[_-]?key|password|token|secret)"
+    - "<your[_-]"
+    - "INSERT[_-]?(YOUR|TOKEN|KEY|HERE)"
+    - "replace[_-]?me"
+    - "=changeme"
+    - "=example$"
+    - "not[_-]?a[_-]?real"
+    - "mock[_-]?credential"
+    - "test[_-]?only"
+    - "FAKE[_-]?API"
+    - "@example\\.(com|org|net)"
+    - "@company\\.example"
 
 
 # Audit logging settings

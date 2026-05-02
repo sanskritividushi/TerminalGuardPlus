@@ -153,8 +153,8 @@ class CascadeEnsembleDetector:
                  use_svm: bool = True,
                  use_entropy: bool = True,
                  use_regex: bool = True,
-                 bilstm_bounds: Tuple[float, float] = (0.2, 0.8),
-                 svm_bounds: Tuple[float, float] = (0.25, 0.75),
+                 bilstm_bounds: Tuple[float, float] = (0.05, 0.95),
+                 svm_bounds: Tuple[float, float] = (0.15, 0.85),
                  entropy_threshold: float = 4.5,
                  entropy_context_boost: float = 1.3):
         """
@@ -208,141 +208,144 @@ class CascadeEnsembleDetector:
         if self.use_entropy:
             print("[CASCADE] Entropy analysis L2.5 enabled")
         
+        self.regex_detector = None
         if self.use_regex:
-            print("[CASCADE] Regex L3 enabled")
+            try:
+                from secret_detector import SecretDetector
+                self.regex_detector = SecretDetector()
+                print("[CASCADE] Regex L3 enabled")
+            except Exception as e:
+                print(f"[CASCADE] Regex load failed: {e}")
+                self.use_regex = False
     
     def detect(self, text: str) -> Dict:
         """
-        Run full cascade detection with early exit optimization.
+        Run cascade detection with regex as mandatory safety net.
         
-        Args:
-            text: Command or text to check
-            
-        Returns:
-            Dict containing:
-            {
-                'decision': bool,  # True = BLOCK, False = ALLOW
-                'cascade_level': int,  # Which level made decision (1, 2, 2.5, 3, or None)
-                'confidence': float,  # 0.0-1.0
-                'probs': {
-                    'bilstm': float or None,
-                    'svm': float or None,
-                    'entropy': float or None,
-                    'final': float or None
-                },
-                'reasoning': str  # Human-readable explanation
-            }
+        Architecture:
+        - L1 BiLSTM + L2 SVM + L2.5 Entropy produce a ML decision
+        - L3 Regex ALWAYS runs as safety net (catches FNs from ML)
+        - Final decision = ML_block OR regex_hit
+        - For ML "block" with no regex confirmation on safe-looking text,
+          we trust ML but note it
         """
         
         p_bilstm = None
         p_svm = None
         p_entropy = None
+        ml_decision = None  # True=block, False=safe, None=uncertain
+        ml_level = None
+        ml_confidence = None
+        ml_reasoning = None
         
         # ========== L1: BiLSTM (Primary Detector) ==========
         if self.use_bilstm and self.bilstm_detector:
             try:
                 p_bilstm = self.bilstm_detector.score(text)
                 
-                # High confidence secret → BLOCK
                 if p_bilstm > self.bilstm_bounds[1]:
-                    return {
-                        'decision': True,
-                        'cascade_level': 1,
-                        'confidence': p_bilstm,
-                        'probs': {'bilstm': p_bilstm, 'svm': None, 'entropy': None, 'final': p_bilstm},
-                        'reasoning': f'L1 BiLSTM: High confidence secret (prob={p_bilstm:.3f})'
-                    }
-                
-                # High confidence safe → ALLOW
+                    ml_decision = True
+                    ml_level = 1
+                    ml_confidence = p_bilstm
+                    ml_reasoning = f'L1 BiLSTM: High confidence secret (prob={p_bilstm:.3f})'
                 elif p_bilstm < self.bilstm_bounds[0]:
-                    return {
-                        'decision': False,
-                        'cascade_level': 1,
-                        'confidence': 1 - p_bilstm,
-                        'probs': {'bilstm': p_bilstm, 'svm': None, 'entropy': None, 'final': p_bilstm},
-                        'reasoning': f'L1 BiLSTM: High confidence safe (prob={p_bilstm:.3f})'
-                    }
-                
-                # Gray zone → continue to L2
+                    ml_decision = False
+                    ml_level = 1
+                    ml_confidence = 1 - p_bilstm
+                    ml_reasoning = f'L1 BiLSTM: High confidence safe (prob={p_bilstm:.3f})'
+                # else: gray zone, continue
             except Exception as e:
                 print(f"[CASCADE] BiLSTM error: {e}")
         
-        # ========== L2: SVM (Gray Zone Specialist) ==========
-        if self.use_svm and self.svm_detector:
+        # ========== L2: SVM (if L1 uncertain) ==========
+        if ml_decision is None and self.use_svm and self.svm_detector:
             try:
                 p_svm_raw = self.svm_detector.score(text)
-                
-                # Normalize SVM decision margin to [0, 1] using sigmoid
                 p_svm = 1.0 / (1.0 + math.exp(-p_svm_raw)) if p_svm_raw is not None else 0.5
                 
-                # High confidence secret
                 if p_svm > self.svm_bounds[1]:
-                    return {
-                        'decision': True,
-                        'cascade_level': 2,
-                        'confidence': p_svm,
-                        'probs': {'bilstm': p_bilstm, 'svm': p_svm, 'entropy': None, 'final': p_svm},
-                        'reasoning': f'L2 SVM: High confidence secret (prob={p_svm:.3f})'
-                    }
-                
-                # High confidence safe
+                    ml_decision = True
+                    ml_level = 2
+                    ml_confidence = p_svm
+                    ml_reasoning = f'L2 SVM: High confidence secret (prob={p_svm:.3f})'
                 elif p_svm < self.svm_bounds[0]:
-                    return {
-                        'decision': False,
-                        'cascade_level': 2,
-                        'confidence': 1 - p_svm,
-                        'probs': {'bilstm': p_bilstm, 'svm': p_svm, 'entropy': None, 'final': p_svm},
-                        'reasoning': f'L2 SVM: High confidence safe (prob={p_svm:.3f})'
-                    }
-                
-                # Gray zone → continue to L2.5
+                    ml_decision = False
+                    ml_level = 2
+                    ml_confidence = 1 - p_svm
+                    ml_reasoning = f'L2 SVM: High confidence safe (prob={p_svm:.3f})'
             except Exception as e:
                 print(f"[CASCADE] SVM error: {e}")
         
-        # ========== L2.5: Entropy Analysis (Unknown Secrets) ==========
-        if self.use_entropy:
+        # ========== L2.5: Entropy (if L1+L2 uncertain) ==========
+        if ml_decision is None and self.use_entropy:
             try:
                 entropy_val = self.entropy_analyzer.calculate_entropy(text)
                 has_context = self.entropy_analyzer.has_secret_context(text)
                 p_entropy = self.entropy_analyzer.entropy_score(text, self.entropy_context_boost)
                 
-                # High entropy + secret context → BLOCK
-                if p_entropy > 0.75 and has_context:
-                    return {
-                        'decision': True,
-                        'cascade_level': 2.5,
-                        'confidence': p_entropy,
-                        'probs': {'bilstm': p_bilstm, 'svm': p_svm, 'entropy': p_entropy, 'final': p_entropy},
-                        'reasoning': f'L2.5 Entropy: High entropy ({entropy_val:.2f} bits/char) + secret context'
-                    }
+                if p_entropy > 0.82 and has_context and entropy_val > self.entropy_threshold:
+                    ml_decision = True
+                    ml_level = 2.5
+                    ml_confidence = p_entropy
+                    ml_reasoning = f'L2.5 Entropy: High entropy ({entropy_val:.2f} bits/char) + secret context'
             except Exception as e:
                 print(f"[CASCADE] Entropy error: {e}")
 
-        # ========== L3: YOUR SecretDetector (200+ config.yaml patterns) ==========
-        if self.use_regex:
+        # ========== L3: Regex ALWAYS runs as safety net ==========
+        regex_hits = []
+        if self.use_regex and self.regex_detector:
             try:
-                from secret_detector import SecretDetector
-                detector = SecretDetector()  # Auto-uses your root/config.yaml (200+ patterns)
-                hits = detector.detect(text)
-                
-                if len(hits) > 0:
-                    hit_types = [hit['type'] for hit in hits[:3]]  # Top 3 hits
-                    return {
-                        'decision': True,
-                        'cascade_level': 3,
-                        'confidence': 1.0,
-                        'probs': {'bilstm': p_bilstm, 'svm': p_svm, 'entropy': p_entropy, 'final': 1.0},
-                        'reasoning': f'L3 SecretDetector: {len(hits)} hits ({", ".join(hit_types)})'
-                    }
-            except ImportError:
-                print("[CASCADE] SecretDetector not found - L3 disabled")
+                regex_hits = self.regex_detector.detect(text)
             except Exception as e:
                 print(f"[CASCADE] SecretDetector error: {e}")
 
-        # ========== Final Decision: Safe ==========
-        # Compute average of available probabilities (FIXED)
+        regex_detected = len(regex_hits) > 0
+
+        # ========== Final Decision Logic ==========
+        # Case 1: Regex found something → BLOCK (zero false-negative guarantee)
+        if regex_detected:
+            hit_types = [hit['type'] for hit in regex_hits[:3]]
+            # If ML also said block, credit the ML level; otherwise credit L3
+            if ml_decision is True:
+                return {
+                    'decision': True,
+                    'cascade_level': ml_level,
+                    'confidence': ml_confidence,
+                    'probs': {'bilstm': p_bilstm, 'svm': p_svm, 'entropy': p_entropy, 'final': ml_confidence},
+                    'reasoning': f'{ml_reasoning} + L3 confirmed ({len(regex_hits)} regex hits)'
+                }
+            else:
+                return {
+                    'decision': True,
+                    'cascade_level': 3,
+                    'confidence': 1.0,
+                    'probs': {'bilstm': p_bilstm, 'svm': p_svm, 'entropy': p_entropy, 'final': 1.0},
+                    'reasoning': f'L3 Regex safety net: {len(regex_hits)} hits ({", ".join(hit_types)})'
+                }
+        
+        # Case 2: ML said block but regex found nothing → trust ML
+        if ml_decision is True:
+            return {
+                'decision': True,
+                'cascade_level': ml_level,
+                'confidence': ml_confidence,
+                'probs': {'bilstm': p_bilstm, 'svm': p_svm, 'entropy': p_entropy, 'final': ml_confidence},
+                'reasoning': ml_reasoning
+            }
+        
+        # Case 3: ML said safe and regex agrees → ALLOW
+        if ml_decision is False:
+            return {
+                'decision': False,
+                'cascade_level': ml_level,
+                'confidence': ml_confidence,
+                'probs': {'bilstm': p_bilstm, 'svm': p_svm, 'entropy': p_entropy, 'final': 1 - (p_bilstm or 0)},
+                'reasoning': ml_reasoning
+            }
+        
+        # Case 4: All levels uncertain, no regex hits → ALLOW
         probs = [p for p in [p_bilstm, p_svm, p_entropy] if p is not None]
-        final_prob = np.mean(probs) if probs else 0.0  # ✅ FIXED
+        final_prob = np.mean(probs) if probs else 0.0
 
         return {
             'decision': False,
